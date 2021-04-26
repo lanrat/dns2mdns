@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 	"strings"
+	"time"
 
 	"dns2mdns/cache"
 
@@ -111,6 +112,21 @@ func (h *handler) ServeDNS(w dns.ResponseWriter, r *dns.Msg) {
 		if err != nil {
 			log.Printf("error on mDNSLookup for [%s] %q %s: %s", clientIP, domain, dns.Type(r.Question[0].Qtype).String(), err)
 			msg.SetRcode(r, dns.RcodeNameError)
+			err = w.WriteMsg(&msg)
+			if err != nil {
+				log.Printf("error on WriteMsg: %s", err)
+			}
+			return
+		}
+
+		if len(ips) == 0 {
+			log.Printf("no results found for [%s] %q %s", clientIP, domain, dns.Type(r.Question[0].Qtype).String())
+			msg.SetRcode(r, dns.RcodeNameError)
+			err = w.WriteMsg(&msg)
+			if err != nil {
+				log.Printf("error on WriteMsg: %s", err)
+			}
+			return
 		}
 
 		// turn each IP into the correct dns RR type
@@ -131,6 +147,23 @@ func (h *handler) ServeDNS(w dns.ResponseWriter, r *dns.Msg) {
 			dnsCache.Set(&msg)
 		}
 		log.Printf("[%s] query: %q type %s mdns-response: %v", clientIP, r.Question[0].Name, dns.Type(r.Question[0].Qtype).String(), ips)
+	} else if r.Question[0].Qtype == dns.TypeSOA {
+		if domain == dns.Fqdn(zone) {
+			msg.Answer = append(msg.Answer, &dns.SOA{
+				Hdr:     dns.RR_Header{Name: domain, Rrtype: dns.TypeSOA, Class: dns.ClassINET, Ttl: defaultTTL},
+				Ns:      "localhost.localdomain.",
+				Mbox:    "root.localhost.localdomain.",
+				Serial:  uint32(time.Now().Unix()),
+				Refresh: 60 * 60, // 1 hour
+				Retry:   60 * 60, // 1 hour
+				Expire:  60 * 60, // 1 hour
+				Minttl:  defaultTTL,
+			})
+			log.Printf("[%s] query: %q type %s soa-response", clientIP, r.Question[0].Name, dns.Type(r.Question[0].Qtype).String())
+		} else {
+			log.Printf("no results found for [%s] %q %s", clientIP, domain, dns.Type(r.Question[0].Qtype).String())
+			msg.SetRcode(r, dns.RcodeNameError)
+		}
 	} else {
 		log.Printf("[%s] unsupported question: %q type %s", clientIP, r.Question[0].Name, dns.Type(r.Question[0].Qtype).String())
 		msg.SetRcode(r, dns.RcodeNotImplemented)
