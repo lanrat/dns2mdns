@@ -81,6 +81,7 @@ Add a Domain Override like below, using the IP of the host running dns2mdns
 ## Docker
 
 A [Dockerfile](Dockerfile) is provided for running dns2mdns as a Docker container. However due to the nature of DNS and mDNS queries, you will need to run the container with `--net=host` for it to work correctly.
+Prebuilt images are on the [Docker Hub](https://hub.docker.com/repository/docker/lanrat/dns2mdns).
 
 ### Docker Compose example
 
