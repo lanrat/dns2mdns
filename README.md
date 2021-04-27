@@ -57,7 +57,7 @@ pfsense.local.         12      IN      A       192.168.1.1
 dns2mdns is not a recursive resolver.
 You will need to forward the mdns `.local` zone from your default dns resolver to the host running dns2mdns.
 
-### unbound configuration
+### Unbound configuration
 
 Edit `unbound.conf` with the following options:
 
