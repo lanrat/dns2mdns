@@ -26,9 +26,8 @@ func startServer(ctx context.Context) error {
 	// start udp dns server
 	g.Go(func() error {
 		srv := &dns.Server{
-			Addr:      listen,
-			Net:       "udp",
-			ReusePort: true,
+			Addr: listen,
+			Net:  "udp",
 		}
 		srv.Handler = &handler{
 			ctx: ctx,
@@ -39,9 +38,8 @@ func startServer(ctx context.Context) error {
 	// start tcp dns server
 	g.Go(func() error {
 		srv := &dns.Server{
-			Addr:      listen,
-			Net:       "tcp",
-			ReusePort: true,
+			Addr: listen,
+			Net:  "tcp",
 		}
 		srv.Handler = &handler{
 			ctx: ctx,
