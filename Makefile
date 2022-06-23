@@ -8,10 +8,12 @@ BIN := dns2mdns
 
 all: dns2mdns
 
+update-deps: go.mod
+	GOPROXY=direct go get -u ./...
+	go mod tidy
+
 deps: go.mod
 	GOPROXY=direct go mod download
-	GOPROXY=direct go get -u all
-	go mod tidy
 
 docker: Dockerfile
 	docker build -t="lanrat/dns2mdns" .
