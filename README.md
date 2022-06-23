@@ -18,6 +18,8 @@ Usage of dns2mdns:
         disable the dns cache
   -timeout duration
         timeout for each request (default 1s)
+  -verbose
+        enable verbose logs
   -zone string
         zone to relay to mdns (default "local")
 ```

@@ -32,16 +32,19 @@ var mdnsInterfaces []net.Interface
 
 func mDNSLookup(ctx context.Context, name string, qType uint16) ([]net.IP, error) {
 	// TODO flag for zeroconf.SelectIPTraffic(zeroconf.IPv4) and zeroconf.IPv6
+	// TODO initalize resolver once?
 	resolver, err := zeroconf.NewResolver(zeroconf.SelectIfaces(mdnsInterfaces))
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize resolver: %w", err)
 	}
 
 	name = dns.Fqdn(name)
+	v("performing mDNS lookup for %s %q", dns.Type(qType).String(), name)
 	IPs, err := resolver.ResolveOnce(ctx, name, qType)
 	if err != nil {
 		return nil, err
 	}
+	v("recieved mDNS response for %s %q: %+v", dns.Type(qType).String(), name, IPs)
 
 	return IPs, nil
 }

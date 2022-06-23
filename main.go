@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"log"
 	"strings"
 	"time"
@@ -16,6 +17,7 @@ var (
 	requestTimeout = flag.Duration("timeout", time.Second, "timeout for each request")
 	listenAddr     = flag.String("listen", "0.0.0.0", "address to listen on for incoming DNS queries")
 	zoneFlag       = flag.String("zone", "local", "zone to relay to mdns")
+	verbose        = flag.Bool("verbose", false, "enable verbose logs")
 )
 
 var zone string
@@ -28,9 +30,19 @@ func main() {
 	if err != nil {
 		log.Fatalf("error setting interfaces: %s", err)
 	}
+	v("Interfaces: %+v", mdnsInterfaces)
 	log.Printf("starting dns -> mdns bridge for %s", zone)
 	err = startServer(context.Background())
 	if err != nil {
 		log.Fatalf("dns server: %s", err)
+	}
+	v("exiting")
+}
+
+func v(format string, v ...interface{}) {
+	if *verbose {
+		line := fmt.Sprintf(format, v...)
+		lines := strings.ReplaceAll(line, "\n", "\n\t")
+		log.Print(lines)
 	}
 }

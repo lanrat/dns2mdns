@@ -20,7 +20,7 @@ const defaultTTL = 60
 
 func startServer(ctx context.Context) error {
 	listen := net.JoinHostPort(*listenAddr, "53")
-	log.Printf("starting dns server on %s", listen)
+	log.Printf("starting DNS server on %s", listen)
 	var g errgroup.Group
 
 	// start udp dns server
@@ -58,6 +58,8 @@ func (h *handler) ServeDNS(w dns.ResponseWriter, r *dns.Msg) {
 	msg := dns.Msg{}
 	msg.SetReply(r)
 	clientIP, _, err := net.SplitHostPort(w.RemoteAddr().String())
+	v("[%s] DNS query:\n%s", clientIP, r.String())
+
 	if err != nil {
 		log.Printf("error: unable to get client IP from %q", w.RemoteAddr().String())
 	}
@@ -99,6 +101,7 @@ func (h *handler) ServeDNS(w dns.ResponseWriter, r *dns.Msg) {
 			if found {
 				// TODO might want to make this log cleaner
 				log.Printf("[%s] query: %q type %s cache-response: %v", clientIP, r.Question[0].Name, dns.Type(r.Question[0].Qtype).String(), dnsAnswerIPs(resp.Answer))
+				v("[%s] DNS cache-response:\n%s", clientIP, msg.String())
 				err = w.WriteMsg(resp)
 				if err != nil {
 					log.Printf("error on WriteMsg: %s", err)
@@ -118,7 +121,7 @@ func (h *handler) ServeDNS(w dns.ResponseWriter, r *dns.Msg) {
 		}
 
 		if len(ips) == 0 {
-			log.Printf("no results found for [%s] %q %s", clientIP, domain, dns.Type(r.Question[0].Qtype).String())
+			log.Printf("[%s] no mDNS results found for %q %s", clientIP, domain, dns.Type(r.Question[0].Qtype).String())
 			msg.SetRcode(r, dns.RcodeNameError)
 			err = w.WriteMsg(&msg)
 			if err != nil {
@@ -159,13 +162,14 @@ func (h *handler) ServeDNS(w dns.ResponseWriter, r *dns.Msg) {
 			})
 			log.Printf("[%s] query: %q type %s soa-response", clientIP, r.Question[0].Name, dns.Type(r.Question[0].Qtype).String())
 		} else {
-			log.Printf("no results found for [%s] %q %s", clientIP, domain, dns.Type(r.Question[0].Qtype).String())
+			log.Printf("[%s] no mDNS results found for %q %s", clientIP, domain, dns.Type(r.Question[0].Qtype).String())
 			msg.SetRcode(r, dns.RcodeNameError)
 		}
 	} else {
 		log.Printf("[%s] unsupported question: %q type %s", clientIP, r.Question[0].Name, dns.Type(r.Question[0].Qtype).String())
 		msg.SetRcode(r, dns.RcodeNotImplemented)
 	}
+	v("[%s] DNS response:\n%s", clientIP, msg.String())
 	err = w.WriteMsg(&msg)
 	if err != nil {
 		log.Printf("error on WriteMsg: %s", err)
