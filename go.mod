@@ -4,11 +4,13 @@ go 1.16
 
 require (
 	github.com/bluele/gcache v0.0.2
-	github.com/lanrat/zeroconf v0.0.0-20210427155953-5493dd57f5a4
-	github.com/miekg/dns v1.1.42
-	golang.org/x/net v0.0.0-20210510120150-4163338589ed // indirect
-	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
-	golang.org/x/sys v0.0.0-20210511113859-b0526f3d8744 // indirect
+	github.com/lanrat/zeroconf v0.0.0-20220623173108-ae93e87713d3
+	github.com/libp2p/go-reuseport v0.2.0 // indirect
+	github.com/miekg/dns v1.1.50
+	golang.org/x/net v0.0.0-20220622184535-263ec571b305 // indirect
+	golang.org/x/sync v0.0.0-20220601150217-0de741cfad7f
+	golang.org/x/sys v0.0.0-20220622161953-175b2fd9d664 // indirect
+	golang.org/x/tools v0.1.11 // indirect
 )
 
 //replace github.com/lanrat/zeroconf => ./zeroconf
